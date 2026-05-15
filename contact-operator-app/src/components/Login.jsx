@@ -19,7 +19,15 @@ export default function Login() {
     });
 
     if (error) {
-      setErrorMessage('Credenziali non valide o utente non abilitato.');
+      const normalized = (error.message || '').toLowerCase();
+      if (normalized.includes('email not confirmed')) {
+        setErrorMessage('Email non confermata. Apri Supabase > Authentication > Users e conferma l\'utente.');
+      } else if (normalized.includes('invalid login credentials')) {
+        setErrorMessage('Credenziali non valide. Verifica email/password o esegui reset password da Supabase.');
+      } else {
+        setErrorMessage(error.message || 'Errore di accesso.');
+      }
+      console.error('Supabase login error:', error);
     }
 
     setLoading(false);
