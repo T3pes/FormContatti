@@ -62,10 +62,10 @@ export default function ContactForm({ user, selectedContact, onSaved, onCancelEd
   async function uploadBusinessCard({ contactId, ownerId }) {
     if (!file) {
       return {
-        path: selectedContact?.business_card_path || '',
-        filename: selectedContact?.business_card_filename || '',
-        mime: selectedContact?.business_card_mime || '',
-        size: selectedContact?.business_card_size || 0,
+        path: selectedContact?.business_card_path || null,
+        filename: selectedContact?.business_card_filename || null,
+        mime: selectedContact?.business_card_mime || null,
+        size: selectedContact?.business_card_size ?? null,
       };
     }
     const fileError = validateFile(file);
@@ -104,10 +104,6 @@ export default function ContactForm({ user, selectedContact, onSaved, onCancelEd
     try {
       if (!form.nome.trim() || !form.cognome.trim() || !form.societa.trim()) {
         setErrorMessage('Nome, cognome e societa sono obbligatori.');
-        return;
-      }
-      if (!isEditing && !file) {
-        setErrorMessage('Per un nuovo contatto devi caricare la foto del biglietto da visita.');
         return;
       }
       if (file) {
@@ -216,13 +212,12 @@ export default function ContactForm({ user, selectedContact, onSaved, onCancelEd
           />
         </label>
         <label>
-          Foto biglietto da visita {isEditing ? '(opzionale se gia presente)' : '*'}
+          Foto biglietto da visita (opzionale)
           <input
             id="business-card-file"
             type="file"
             accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
-            required={!isEditing}
           />
         </label>
         {selectedContact?.business_card_filename && !file && (

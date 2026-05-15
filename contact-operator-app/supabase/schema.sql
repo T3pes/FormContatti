@@ -1,4 +1,5 @@
-﻿create extension if not exists pgcrypto;
+﻿-- noinspection SqlNoDataSourceInspectionForFile
+create extension if not exists pgcrypto;
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
@@ -69,15 +70,19 @@ create table if not exists public.contacts (
   cognome text not null,
   societa text not null,
   note text not null default '',
-  business_card_path text not null,
-  business_card_filename text not null,
-  business_card_mime text not null,
-  business_card_size integer not null,
+  business_card_path text,
+  business_card_filename text,
+  business_card_mime text,
+  business_card_size integer,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 create index if not exists contacts_operator_id_idx on public.contacts(operator_id);
 create index if not exists contacts_created_at_idx on public.contacts(created_at desc);
+alter table public.contacts alter column business_card_path drop not null;
+alter table public.contacts alter column business_card_filename drop not null;
+alter table public.contacts alter column business_card_mime drop not null;
+alter table public.contacts alter column business_card_size drop not null;
 alter table public.contacts enable row level security;
 create or replace function public.set_updated_at()
 returns trigger
@@ -114,8 +119,8 @@ with check (
   and length(trim(cognome)) between 1 and 120
   and length(trim(societa)) between 1 and 180
   and length(trim(note)) <= 3000
-  and business_card_mime in ('image/jpeg', 'image/png', 'image/webp')
-  and business_card_size <= 5242880
+  and (business_card_mime is null or business_card_mime in ('image/jpeg', 'image/png', 'image/webp'))
+  and (business_card_size is null or business_card_size <= 5242880)
 );
 create policy "contacts_update_own_or_admin"
 on public.contacts
@@ -131,8 +136,8 @@ with check (
   and length(trim(cognome)) between 1 and 120
   and length(trim(societa)) between 1 and 180
   and length(trim(note)) <= 3000
-  and business_card_mime in ('image/jpeg', 'image/png', 'image/webp')
-  and business_card_size <= 5242880
+  and (business_card_mime is null or business_card_mime in ('image/jpeg', 'image/png', 'image/webp'))
+  and (business_card_size is null or business_card_size <= 5242880)
 );
 create policy "contacts_delete_own_or_admin"
 on public.contacts

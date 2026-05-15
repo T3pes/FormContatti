@@ -6,6 +6,11 @@ function formatDate(value) {
 }
 export default function ContactList({ contacts, loading, onEdit, onDeleted, isAdmin }) {
   async function openBusinessCard(contact) {
+    if (!contact.business_card_path) {
+      window.alert('Nessuna foto associata a questo contatto.');
+      return;
+    }
+
     const { data, error } = await supabase.storage
       .from('business-cards')
       .createSignedUrl(contact.business_card_path, 60);
@@ -94,13 +99,17 @@ export default function ContactList({ contacts, loading, onEdit, onDeleted, isAd
                   {isAdmin && <td>{contact.operator_email || contact.operator_id}</td>}
                   <td>{formatDate(contact.created_at)}</td>
                   <td>
-                    <button
-                      type="button"
-                      className="small-button"
-                      onClick={() => openBusinessCard(contact)}
-                    >
-                      Apri
-                    </button>
+                    {contact.business_card_path ? (
+                      <button
+                        type="button"
+                        className="small-button"
+                        onClick={() => openBusinessCard(contact)}
+                      >
+                        Apri
+                      </button>
+                    ) : (
+                      <span className="muted">-</span>
+                    )}
                   </td>
                   <td>
                     <div className="row-actions">
